@@ -1,5 +1,5 @@
-import Mocha from 'mocha';
-import assert from 'assert';
+const Mocha = require('mocha');
+const assert =require ('assert')
 const mocha = new Mocha();
 mocha.suite.emit('pre-require', this, 'solution', mocha);
 declare const describe: any, it: any, beforeEach: any;
@@ -106,23 +106,9 @@ function execute(commands: string): string[] {
   const key = commands.split(' ')[1] || '';
   const value = commands.split(' ')[2] || '';
 
-  console.log({
-    command,
-    key,
-    value,
-  })
   const result = executeCommand(command, key, value);
 
   return [result];
-}
-
-const commandMapper = {
-    'add': db.add.prototype,
-    'remove': db.remove.prototype,
-    'members': db.members.prototype,
-    'items': db.allItems.prototype,
-    'keys': db.keys.prototype,
-    'all': db.allMembers.prototype,
 }
 
 const executeCommand = (
@@ -130,41 +116,28 @@ const executeCommand = (
   key: string,
   value: string
 ): string => {
+  switch (command.toLowerCase()) {
+    case 'add':
+      return db.add(key, value);
 
+    case 'keys':
+      return db.keys().join(',');
 
+    case 'members':
+      return db.members(key);
 
-    console.log('command', command.toLowerCase())
-    const func = commandMapper[command.toLowerCase()];
+    case 'remove':
+      return db.remove(key, value);
 
+    case 'allmembers':
+      return db.allMembers();
 
-    if (!func) {
-        return `Unknown command: ${command}`;
-    }
+    case 'allitems':
+        return db.allItems();
 
-    console.log('func', func)
-    return func(key, value);
-//   switch (command.toLowerCase()) {
-//     case 'add':
-//       return db.add(key, value);
-
-//     case 'keys':
-//       return db.keys().join(',');
-
-//     case 'members':
-//       return db.members(key);
-
-//     case 'remove':
-//       return db.remove(key, value);
-
-//     case 'allmembers':
-//       return db.allMembers();
-
-//     case 'allitems':
-//         return db.allItems();
-
-//     default:
-//       throw new Error(`Unknown command: ${command}`);
-//   }
+    default:
+      throw new Error(`Unknown command: ${command}`);
+  }
 };
 
 describe('set', () => {
@@ -174,68 +147,68 @@ describe('set', () => {
     assert.deepEqual(execute('ADD color green'), ['ERROR, key already exists']);
   });
 
-//   it('show keys', () => {
-//     execute('ADD color blue');
-//     execute('ADD numbers 1');
-//     execute('ADD images hello.png');
-//     assert.deepEqual(execute('KEYS'), ['color,numbers,images']);
-//   });
+  it('show keys', () => {
+    execute('ADD color blue');
+    execute('ADD numbers 1');
+    execute('ADD images hello.png');
+    assert.deepEqual(execute('KEYS'), ['color,numbers,images']);
+  });
 
-//   it('show members', () => {
-//     execute('ADD images example1');
-//     execute('ADD images example2');
-//     execute('ADD images hello.png');
-//     assert.deepEqual(execute('MEMBERS images'), [
-//       'hello.png,example1,example2',
-//     ]);
-//     assert.deepEqual(execute('MEMBERS unknown'), ['Key does not exist']);
-//   });
+  it('show members', () => {
+    execute('ADD images example1');
+    execute('ADD images example2');
+    execute('ADD images hello.png');
+    assert.deepEqual(execute('MEMBERS images'), [
+      'hello.png,example1,example2',
+    ]);
+    assert.deepEqual(execute('MEMBERS unknown'), ['Key does not exist']);
+  });
 
-//   it('remove key value', () => {
-//     execute('ADD images example1');
-//     execute('ADD images example2');
-//     execute('ADD images hello.png');
-//     assert.deepEqual(execute('REMOVE images hello.png'), ['Removed']);
-//     assert.deepEqual(execute('MEMBERS images'), ['example1,example2']);
-//     assert.deepEqual(execute('REMOVE images example2'), ['Removed']);
-//     assert.deepEqual(execute('MEMBERS images'), ['example1']);
-//     assert.deepEqual(execute('REMOVE images example1'), ['Removed']);
-//     assert.deepEqual(execute('MEMBERS images'), ['Key does not exist']);
-//   });
+  it('remove key value', () => {
+    execute('ADD images example1');
+    execute('ADD images example2');
+    execute('ADD images hello.png');
+    assert.deepEqual(execute('REMOVE images hello.png'), ['Removed']);
+    assert.deepEqual(execute('MEMBERS images'), ['example1,example2']);
+    assert.deepEqual(execute('REMOVE images example2'), ['Removed']);
+    assert.deepEqual(execute('MEMBERS images'), ['example1']);
+    assert.deepEqual(execute('REMOVE images example1'), ['Removed']);
+    assert.deepEqual(execute('MEMBERS images'), ['Key does not exist']);
+  });
 
-//   it('allmembers', () => {
-//     execute('ADD images example1.png');
-//     execute('ADD images example2.png');
-//     execute('ADD images hello.png');
+  it('allmembers', () => {
+    execute('ADD images example1.png');
+    execute('ADD images example2.png');
+    execute('ADD images hello.png');
 
-//     execute('ADD colors green');
-//     execute('ADD colors red');
-//     execute('ADD colors blue');
+    execute('ADD colors green');
+    execute('ADD colors red');
+    execute('ADD colors blue');
 
-//     execute('ADD fruits apple');
-//     execute('ADD fruits orange');
-//     execute('ADD fruits banana');
+    execute('ADD fruits apple');
+    execute('ADD fruits orange');
+    execute('ADD fruits banana');
 
-//     assert.deepEqual(execute('ALLMEMBERS'), ['blue,green,1,example1.png,example2.png,hello.png,green,red,blue,apple,orange,banana']);
+    assert.deepEqual(execute('ALLMEMBERS'), ['blue,green,1,example1.png,example2.png,hello.png,green,red,blue,apple,orange,banana']);
   
-//   });
+  });
 
-//   it('allItems', () => {
-//     execute('ADD images example1.png');
-//     execute('ADD images example2.png');
-//     execute('ADD images hello.png');
+  it('allItems', () => {
+    execute('ADD images example1.png');
+    execute('ADD images example2.png');
+    execute('ADD images hello.png');
 
-//     execute('ADD colors green');
-//     execute('ADD colors red');
-//     execute('ADD colors blue');
+    execute('ADD colors green');
+    execute('ADD colors red');
+    execute('ADD colors blue');
 
-//     execute('ADD fruits apple');
-//     execute('ADD fruits orange');
-//     execute('ADD fruits banana');
+    execute('ADD fruits apple');
+    execute('ADD fruits orange');
+    execute('ADD fruits banana');
 
-//     assert.deepEqual(execute('ALLITEMS'), ['color: blue,green,numbers: 1,images: example1.png,example2.png,hello.png,colors: green,red,blue,fruits: apple,orange,banana']);
+    assert.deepEqual(execute('ALLITEMS'), ['color: blue,green,numbers: 1,images: example1.png,example2.png,hello.png,colors: green,red,blue,fruits: apple,orange,banana']);
   
-//   });
+  });
   beforeEach(() => {});
 });
 
